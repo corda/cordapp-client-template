@@ -1,0 +1,66 @@
+version: '3'
+networks:
+  default:
+    
+services:
+  notary-and-network-map:     
+      image: "roastario/notary-and-network-map:4.0"
+      ports:
+        - "10200:10200"
+        - "8080:8080"
+      environment:
+          - PUBLIC_ADDRESS=notary-and-network-map
+          - MY_PUBLIC_ADDRESS=notary-and-network-map
+      networks:
+        - default
+      deploy:
+        restart_policy:
+          condition: any
+
+  party-a:
+    image: "party-a"
+    ports:
+      - "2221:2222"
+    depends_on:
+      - notary-and-network-map
+    environment:
+        - COMPATIBILITY_ZONE=http://notary-and-network-map:8080
+        - MY_LEGAL_NAME=O=PartyA,L=London,C=GB
+        - MY_PUBLIC_ADDRESS=party-a
+    networks:
+      - default
+    deploy:
+      restart_policy:
+        condition: none
+
+  party-b:
+    image: "party-b"
+    ports:
+      - "2222:2222"
+    depends_on:
+      - notary-and-network-map
+    environment:
+        - COMPATIBILITY_ZONE=http://notary-and-network-map:8080
+        - MY_LEGAL_NAME=O=PartyB,L=New York,C=US
+        - MY_PUBLIC_ADDRESS=party-b
+    networks:
+      - default
+    deploy:
+      restart_policy:
+        condition: none
+
+  party-c:
+    image: "party-c"
+    ports:
+      - "2223:2222"
+    depends_on:
+      - notary-and-network-map
+    environment:
+        - COMPATIBILITY_ZONE=http://notary-and-network-map:8080
+        - MY_LEGAL_NAME=O=PartyC,L=London,C=GB
+        - MY_PUBLIC_ADDRESS=party-c
+    networks:
+      - default
+    deploy:
+      restart_policy:
+        condition: none
