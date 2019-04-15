@@ -87,7 +87,7 @@ class AmendDraftFlow(val existingStateRef: StateRef,
 
         // get existing state details
         val inputStateAndRef = serviceHub.toStateAndRef<ExampleState>(existingStateRef)
-        val inputState = inputStateAndRef.state.data as ExampleState
+        val inputState = inputStateAndRef.state.data
 
 
         // create output state
@@ -148,7 +148,7 @@ class AgreeFlow(val existingStateRef: StateRef) : FlowLogic<SignedTransaction>()
 
         // get existing state details
         val inputStateAndRef = serviceHub.toStateAndRef<ExampleState>(existingStateRef)
-        val inputState = inputStateAndRef.state.data as ExampleState
+        val inputState = inputStateAndRef.state.data
 
 
         // create output state
