@@ -52,6 +52,16 @@ dependencies {
 
     // CorDapp dependencies.
     cordapp project(":contracts")
+     
+    // Business Networks
+    cordapp "com.r3.businessnetworks:membership-service:2.0"
+    cordapp "com.r3.businessnetworks:membership-service-contracts-and-states:2.0"
+    
+    // Billing
+    cordapp "com.r3.businessnetworks:billing-app:2.0"
+    cordapp "com.r3.businessnetworks:billing-contracts-and-states:2.0"
+        
+
 }
 
 task integrationTest(type: Test, dependsOn: []) {

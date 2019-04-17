@@ -76,6 +76,9 @@ allprojects {
         maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda' }
         maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
         maven { url 'https://jitpack.io' }
+        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-solutions-releases' 
+        
+        }
         mavenLocal()
     }
 }
@@ -108,6 +111,16 @@ dependencies {
     cordaCompile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j_version}"
     cordaCompile "org.apache.logging.log4j:log4j-web:${log4j_version}"
     cordaCompile "org.slf4j:jul-to-slf4j:$slf4j_version"
+
+    // Business Networks
+    cordapp "com.r3.businessnetworks:membership-service:2.0"
+    cordapp "com.r3.businessnetworks:membership-service-contracts-and-states:2.0"
+
+    // Billing
+    cordapp "com.r3.businessnetworks:billing-app:2.0"
+    cordapp "com.r3.businessnetworks:billing-contracts-and-states:2.0"
+    
+    // Business Network Billing
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
