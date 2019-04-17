@@ -1,5 +1,8 @@
 package com.template
 
+import com.template.flows.AgreeFlow
+import com.template.flows.AmendDraftFlow
+import com.template.flows.CreateDraftFlow
 import com.template.states.ExampleState
 import com.template.states.ExampleStateStatus
 import com.template.workflows.AgreeFlow
