@@ -18,10 +18,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 
-
-private const val CONTROLLER_NAME = "config.BNMController.name"
-
-
 /**
  *  A Spring Boot controller for interacting with the Business Network Membership services via RPC.
  */
@@ -29,8 +25,7 @@ private const val CONTROLLER_NAME = "config.BNMController.name"
 @RestController
 @RequestMapping("/api/bnm/") // The paths for GET and POST requests are relative to this base path.
 class BNMController(
-        private val rpc: NodeRPCConnection,
-        @Value("\${$CONTROLLER_NAME}") private val controllerName: String) {
+        private val rpc: NodeRPCConnection) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(BNMController::class.java)
@@ -66,11 +61,11 @@ class BNMController(
     }
 
     @GetMapping(value = "members", produces = arrayOf("application/json"))
-    fun getMembers(): ResponseEntity<List<PartyAndMembershipMetadata<*>>> {
+    fun getMembers(): ResponseEntity<List<CordaX500Name>> {
 
         return try {
             val parties = BNUtilities.getPartiesOnThisBusinessNetwork(proxy,bno)
-            ResponseEntity.ok().body(parties)
+            ResponseEntity.ok().body(parties.map { it.party.name }.toList())
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)
             ResponseEntity.badRequest().body(null)
@@ -79,7 +74,6 @@ class BNMController(
 
     @GetMapping(value = "membersRefresh", produces = arrayOf("application/json"))
     fun getMembersRefresh(): ResponseEntity<List<PartyAndMembershipMetadata<*>>> {
-        val bno =  proxy.startFlow(::getBNOIdentities).returnValue.getOrThrow().first()
 
          return try {
             val parties = BNUtilities.getPartiesOnThisBusinessNetwork(proxy, bno)
@@ -100,7 +94,7 @@ class BNMController(
              ResponseEntity.ok().body(string)
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)
-             ResponseEntity.badRequest().body(null)
+             ResponseEntity.badRequest().body(null!!)
         }
     }
 }

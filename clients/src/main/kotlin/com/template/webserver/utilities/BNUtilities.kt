@@ -33,6 +33,7 @@ class BNUtilities {
         fun getPartiesOnThisBusinessNetwork(services: CordaRPCOps, bno : Party, refresh : Boolean = false) : List<PartyAndMembershipMetadata<*>> {
             timeNowInMillis = Instant.now().toEpochMilli()
             logger.info("Calling getPartiesOnThisBusinessNetwork at ${Instant.now()}")
+
             if(partyAndMembershipMetadataCache == null || (timeNowInMillis - timeOfLastCacheInMillis) > twentyFourHoursInMilliSeconds) {
                 logger.info("Cache is empty or 24 hours has past since last membership check, going to call getMembersFlow")
                 val flowHandle = services.startTrackedFlow(::GetMembersFlow, bno, refresh, true)

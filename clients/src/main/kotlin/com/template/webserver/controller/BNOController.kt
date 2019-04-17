@@ -21,17 +21,13 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.lang.RuntimeException
 
-
-private const val CONTROLLER_NAME = "config.BNOController.name"
-
 /**
  *  A Spring Boot controller for interacting with the Business Network Operator services via RPC.
  */
 @RestController
-@RequestMapping("/springRPC/bno") // The paths for GET and POST requests are relative to this base path.
+@RequestMapping("/api/bno") // The paths for GET and POST requests are relative to this base path.
 class BNOController(
-        private val rpc: NodeRPCConnection,
-        @Value("\${$CONTROLLER_NAME}") private val controllerName: String) {
+        private val rpc: NodeRPCConnection) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(BNOController::class.java)
@@ -50,7 +46,6 @@ class BNOController(
         proxy = rpc.proxy
         bno =  proxy.startFlow(::getBNOIdentities).returnValue.getOrThrow().first()
     }
-
 
     /** Returns the Business Network's membership states. */
     @GetMapping(value = "state", produces = arrayOf("application/json"))
@@ -104,5 +99,5 @@ class BNOController(
     private fun findPartyForName(name : String) : Party {
         return proxy.wellKnownPartyFromX500Name(CordaX500Name.parse(name)) ?: throw RuntimeException("Party not found")
     }
-    
+
 }
