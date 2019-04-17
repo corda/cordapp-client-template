@@ -5,9 +5,6 @@ import com.template.flows.AmendDraftFlow
 import com.template.flows.CreateDraftFlow
 import com.template.states.ExampleState
 import com.template.states.ExampleStateStatus
-import com.template.workflows.AgreeFlow
-import com.template.workflows.AmendDraftFlow
-import com.template.workflows.CreateDraftFlow
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.StateRef

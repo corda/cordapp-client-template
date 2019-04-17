@@ -21,7 +21,7 @@ import org.junit.Test
 class ExampleFlowTests{
 
 
-    val mnp = MockNetworkParameters(listOf(TestCordapp.findCordapp("com.template.contracts"), TestCordapp.findCordapp("com.template.workflows")
+    val mnp = MockNetworkParameters(listOf(TestCordapp.findCordapp("com.template.contracts"), TestCordapp.findCordapp("com.template.flows")
     ))
 
     val mockNetworkParameters = mnp.withNetworkParameters(testNetworkParameters(minimumPlatformVersion = 4))
