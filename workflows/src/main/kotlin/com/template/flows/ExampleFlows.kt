@@ -1,4 +1,4 @@
-package com.template.workflows
+package com.template.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.template.contracts.ExampleContract
