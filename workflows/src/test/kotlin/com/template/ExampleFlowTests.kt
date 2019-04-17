@@ -1,12 +1,12 @@
 package com.template
 
 
+import com.template.flows.AgreeFlow
+import com.template.flows.AmendDraftFlow
+import com.template.flows.CreateDraftFlow
+import com.template.flows.CreateDraftResponderFlow
 import com.template.states.ExampleState
 import com.template.states.ExampleStateStatus
-import com.template.workflows.AgreeFlow
-import com.template.workflows.AmendDraftFlow
-import com.template.workflows.CreateDraftFlow
-import com.template.workflows.CreateDraftResponderFlow
 import net.corda.core.contracts.StateRef
 import net.corda.core.node.services.queryBy
 import net.corda.core.utilities.getOrThrow
