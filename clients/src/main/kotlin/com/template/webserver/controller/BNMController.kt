@@ -1,10 +1,9 @@
 package com.template.webserver.controller
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.r3.businessnetworks.membership.flows.member.PartyAndMembershipMetadata
 import com.r3.businessnetworks.membership.flows.member.RequestMembershipFlow
 import com.r3.businessnetworks.membership.states.SimpleMembershipMetadata
-import com.template.extentions.getBNOIdentities
+import com.template.flows.getBNOIdentities
 import com.template.webserver.NodeRPCConnection
 import com.template.webserver.utilities.BNUtilities
 import net.corda.core.identity.CordaX500Name
@@ -44,6 +43,7 @@ class BNMController(
     private val bno : Party
 
 
+
     // Upon creation, the controller starts streaming information on new ** states to a websocket.
     // The front-end can subscribe to this websocket to be notified of updates.
     init {
@@ -67,6 +67,7 @@ class BNMController(
 
     @GetMapping(value = "members", produces = arrayOf("application/json"))
     fun getMembers(): ResponseEntity<List<PartyAndMembershipMetadata<*>>> {
+
         return try {
             val parties = BNUtilities.getPartiesOnThisBusinessNetwork(proxy,bno)
             ResponseEntity.ok().body(parties)
@@ -78,25 +79,28 @@ class BNMController(
 
     @GetMapping(value = "membersRefresh", produces = arrayOf("application/json"))
     fun getMembersRefresh(): ResponseEntity<List<PartyAndMembershipMetadata<*>>> {
-        return try {
+        val bno =  proxy.startFlow(::getBNOIdentities).returnValue.getOrThrow().first()
+
+         return try {
             val parties = BNUtilities.getPartiesOnThisBusinessNetwork(proxy, bno)
-            ResponseEntity.ok().body(parties)
+             ResponseEntity.ok().body(parties)
         } catch (ex: Throwable) {
-            logger.error(ex.message, ex)
-            ResponseEntity.badRequest().body(null!!)
+             logger.error(ex.message, ex)
+             ResponseEntity.badRequest().body(null)
         }
     }
 
     @GetMapping(value = "membershipStatus", produces = arrayOf("application/json"))
     fun getMembershipStatus(): ResponseEntity<String> {
-        return try {
+
+         return try {
             logger.info("Returning this node's membership status")
             val membershipState = BNUtilities.getMembershipState(proxy)
             val string = membershipState.toString()
-            ResponseEntity.ok().body(string)
+             ResponseEntity.ok().body(string)
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)
-            ResponseEntity.badRequest().body(null!!)
+             ResponseEntity.badRequest().body(null)
         }
     }
 }

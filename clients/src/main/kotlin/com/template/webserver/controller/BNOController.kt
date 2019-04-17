@@ -1,11 +1,10 @@
 package com.template.webserver.controller
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.r3.businessnetworks.membership.flows.bno.ActivateMembershipForPartyFlow
 import com.r3.businessnetworks.membership.flows.bno.SuspendMembershipFlow
 import com.r3.businessnetworks.membership.states.MembershipState
 import com.r3.businessnetworks.membership.states.SimpleMembershipMetadata
-import com.template.extentions.getBNOIdentities
+import com.template.flows.getBNOIdentities
 import com.template.webserver.NodeRPCConnection
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
@@ -19,7 +18,6 @@ import net.corda.core.utilities.getOrThrow
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.bind.annotation.*
 import java.lang.RuntimeException
 
@@ -63,7 +61,7 @@ class BNOController(
             ResponseEntity.ok().body(membershipStates)
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)
-            return null!!
+            ResponseEntity.badRequest().body(null)
         }
     }
 
@@ -106,8 +104,5 @@ class BNOController(
     private fun findPartyForName(name : String) : Party {
         return proxy.wellKnownPartyFromX500Name(CordaX500Name.parse(name)) ?: throw RuntimeException("Party not found")
     }
-
-
-
-
+    
 }
