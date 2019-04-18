@@ -12,6 +12,11 @@ See https://docs.corda.net/getting-set-up.html.
 
 # Usage
 
+## Build the project
+
+To ensure everything is building correctly run open the command line at the root of the project and run `gradle build`
+
+
 ## Running the nodes
 
 See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
@@ -19,9 +24,11 @@ See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
 This can be done by the network bootstrapper method simply by running the two scripts in the `script` folder. You might need to changed the file permissions first to do so. 
 
     cd scripts
-    chmod +x deployNodes.sh runNodes.sh 
+    chmod +x deployNodes.sh runNodes.sh requestBusinessNetworkMembership.sh
     ./deployNodes.sh 
     ./runNodes.sh
+## Open project in Intellij
+
 
 ## Interacting with the nodes
 
