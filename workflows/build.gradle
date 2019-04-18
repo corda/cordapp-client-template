@@ -61,7 +61,8 @@ dependencies {
     cordapp "com.r3.businessnetworks:billing-app:2.0"
     cordapp "com.r3.businessnetworks:billing-contracts-and-states:2.0"
     cordapp "com.r3.businessnetworks:businessnetworks-utilities:2.0"
-        
+    cordapp "com.r3.businessnetworks:businessnetworks-test-utilities:2.0"
+
 
 }
 
