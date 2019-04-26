@@ -94,7 +94,7 @@ class BNMController(
              ResponseEntity.ok().body(string)
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)
-             ResponseEntity.badRequest().body(null!!)
+             ResponseEntity.badRequest().body(null)
         }
     }
 }
