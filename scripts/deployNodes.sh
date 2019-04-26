@@ -13,8 +13,8 @@ rm -rf build/nodes
 cp conf/membership-service.conf build/nodes/Notary/cordapps/config/.
 cp conf/billing-app.conf build/nodes/Notary/cordapps/config/.
 
-cp conf/membership-service.conf build/nodes/Worldpay_BNO/cordapps/config/.
-cp conf/billing-app.conf build/nodes/Worldpay_BNO/cordapps/config/.
+cp conf/membership-service.conf build/nodes/Polo_BNO/cordapps/config/.
+cp conf/billing-app.conf build/nodes/Polo_BNO/cordapps/config/.
 
 cp conf/membership-service.conf build/nodes/PartyA/cordapps/config/.
 cp conf/billing-app.conf build/nodes/PartyA/cordapps/config/.
