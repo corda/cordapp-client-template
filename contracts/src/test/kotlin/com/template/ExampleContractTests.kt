@@ -8,6 +8,7 @@ import com.template.contracts.ExampleContract
 import com.template.states.ExampleState
 import com.template.states.ExampleStateStatus
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
 import net.corda.testing.common.internal.testNetworkParameters
@@ -30,6 +31,8 @@ class ExampleContractTests{
     // Set up some test Identities to use in the tests
     private val party1 = TestIdentity(CordaX500Name.parse("O=party1,L=London,C=GB"))
     private val party2 = TestIdentity(CordaX500Name.parse("O=party2,L=NewYork,C=US"))
+    private val bno = TestIdentity(CordaX500Name.parse("O=BNO,L=NewYork,C=US"))
+
     private val otherIdentity = TestIdentity(CordaX500Name.parse("O=otherIdentity,L=Paris,C=FR"))
 
 
@@ -41,8 +44,9 @@ class ExampleContractTests{
 
     private val agreedState1 = ExampleState(party1.party, party2.party, "This is agreement 1", ExampleStateStatus.AGREED)
 
-    private val billingState1 = BillingState(party1.party, party2.party,50L,50L,BillingStateStatus.ACTIVE)
-    private val billingChip1 = BillingChipState(party1.party,party2.party, 10L, UniqueIdentifier())
+    private val billingState1 = BillingState(bno.party, party1.party,50L,0L,BillingStateStatus.ACTIVE)
+    private val billingChip1 = BillingChipState(bno.party,party1.party, 10L, UniqueIdentifier())
+    private val billingChip2 = BillingChipState(bno.party,party1.party, 10L, UniqueIdentifier())
 
 
     @Test
@@ -51,28 +55,48 @@ class ExampleContractTests{
         // The ledgerServices DSL allows you to build transactions and test them against your contract logic
         ledgerServices.ledger {
 
-            // transaction {} allows you to build up a transaction for testing and assert whether it shoudl pass or fail verification
+            // transaction to add billing state to the ledger
+/*
+            transaction {
+
+                output(BillingContract.CONTRACT_NAME, billingState1)
+
+                command(signers = listOf(bno.publicKey, party1.publicKey), commandData = BillingContract.Commands.Issue())
+
+                this.verifies()
+            }
+
+            // transaction {} allows you to build up a transaction for testing and assert whether it should pass or fail verification
             transaction {
 
                 // output() adds an output state to the transaction, you need to supply the contract references by it's CONTRACT_NAME and the pre formed state
                 output(ExampleContract.CONTRACT_NAME, draftState2)
 
                 // Add billing state
-                input(BillingContract.CONTRACT_NAME, billingState1)
+                reference(BillingContract.CONTRACT_NAME, billingState1)
 
                 // Add billing token as reference state
-                reference(BillingContract.CONTRACT_NAME, billingChip1)
+                input(BillingContract.CONTRACT_NAME, billingChip1)
 
-                // command() adds a command to the transaction, you need to supply the required signers and the command
-                command(signer = party1.publicKey, commandData = ExampleContract.Commands.CreateDraft())
+                //command() adds a command to the transaction, you need to supply the required signers and the command
+                command(party1.publicKey,ExampleContract.Commands.CreateDraft())
 
-                command(signer = party1.publicKey, commandData = BillingContract.Commands.ChipOff())
+                command(party1.publicKey,BillingContract.Commands.ChipOff())
 
                 // assert whether the transaction should pass verification or not
                 this.verifies()
+            }*/
+
+            transaction{
+                val billingState = BillingState(bno.party, party1.party,50L,0L,BillingStateStatus.ACTIVE)
+                billingState.chipOff(1L)
+                input(BillingContract.CONTRACT_NAME, billingState.chipOff(1L).second)
+                reference(BillingContract.CONTRACT_NAME, billingState)
+                command(party1.publicKey, BillingContract.Commands.UseChip(party1.party))
+                failsWith("There should be a UseChip command for each BillingChip owner")
             }
 
-
+            /*
             // An example where wrong command is used
             transaction {
 
@@ -86,11 +110,12 @@ class ExampleContractTests{
                 //If you comment the above failsWith() line and uncomment the below line, the test will fail as the error thrown does not match the error expected
                 //this.failsWith("Some other error message")
             }
+            */
 
         }
     }
 
-
+/*
     @Test
     fun `Selection of Contract tests`(){
 
@@ -156,4 +181,5 @@ class ExampleContractTests{
             }
         }
     }
+    */
 }
