@@ -68,6 +68,18 @@ the other nodes on the network:
       "legalIdentitiesAndCerts" : [ "O=PartyB, L=New York, C=US" ],
       "platformVersion" : 3,
       "serial" : 1541505384742
+    },
+      {
+      "addresses" : [ "localhost:10011" ],
+      "legalIdentitiesAndCerts" : [ "O=PartyC, L=New York, C=US" ],
+      "platformVersion" : 3,
+      "serial" : 1541505384742
+    },
+      {
+      "addresses" : [ "localhost:10014" ],
+      "legalIdentitiesAndCerts" : [ "O=Polo_BNO, L=London, C=US" ],
+      "platformVersion" : 3,
+      "serial" : 1541505384742
     }
     ]
     
@@ -119,7 +131,11 @@ The list of available endpoints to play with now are:
     /api/states
     
 You can add your own custom endpoints to the Spring Custom Controller, or any other controller of your choosing.
-    
+
+#### Joining the business network
+
+After you the webservers are successfully running you can request for each node to join the business network of the BNO node. This is done via the `requestBusinessNetworkMembership.sh` script within the `scripts` folder.
+
 ### Run a local Docker network
 
 You can interact with the Corda nodes on your own mini network of docker containers. You can bootstrap this network via the `docker.sh` script within docker module. This script will create containers according to how many names you specifiy in the participant.txt file. 
@@ -160,6 +176,7 @@ You can deploy a collection of Corda nodes within docker containers on a kuberne
 The essential commands are:
 
 **Remove any existing yo-app stacks.**
+
 ```
 docker stack rm yo-app --orchestrator=kubernetes
 ```
