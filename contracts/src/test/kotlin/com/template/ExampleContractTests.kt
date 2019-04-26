@@ -56,7 +56,7 @@ class ExampleContractTests{
         ledgerServices.ledger {
 
             // transaction to add billing state to the ledger
-/*
+
             transaction {
 
                 output(BillingContract.CONTRACT_NAME, billingState1)
@@ -65,7 +65,7 @@ class ExampleContractTests{
 
                 this.verifies()
             }
-
+            /*
             // transaction {} allows you to build up a transaction for testing and assert whether it should pass or fail verification
             transaction {
 
@@ -85,7 +85,7 @@ class ExampleContractTests{
 
                 // assert whether the transaction should pass verification or not
                 this.verifies()
-            }*/
+            }
 
             transaction{
                 val billingState = BillingState(bno.party, party1.party,50L,0L,BillingStateStatus.ACTIVE)
@@ -95,7 +95,7 @@ class ExampleContractTests{
                 command(party1.publicKey, BillingContract.Commands.UseChip(party1.party))
                 failsWith("There should be a UseChip command for each BillingChip owner")
             }
-
+            */
             /*
             // An example where wrong command is used
             transaction {
