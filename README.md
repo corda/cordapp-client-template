@@ -16,7 +16,7 @@ This includes having pre `1.8.0_161` versions of the Java Development Kit (JDK) 
 
 ## Build the project
 
-To ensure everything is building correctly run open the command line at the root of the project and run `gradle build`
+To ensure everything is building correctly run open the command line at the root of the project and run `./gradlew clean build`
 
 On success you can open the project in Intellij. There are two approaches you can follow. 
 
