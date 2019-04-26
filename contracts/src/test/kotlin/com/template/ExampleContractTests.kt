@@ -65,121 +65,26 @@ class ExampleContractTests{
 
                 this.verifies()
             }
-            /*
-            // transaction {} allows you to build up a transaction for testing and assert whether it should pass or fail verification
-            transaction {
 
-                // output() adds an output state to the transaction, you need to supply the contract references by it's CONTRACT_NAME and the pre formed state
-                output(ExampleContract.CONTRACT_NAME, draftState2)
-
-                // Add billing state
-                reference(BillingContract.CONTRACT_NAME, billingState1)
-
-                // Add billing token as reference state
-                input(BillingContract.CONTRACT_NAME, billingChip1)
-
-                //command() adds a command to the transaction, you need to supply the required signers and the command
-                command(party1.publicKey,ExampleContract.Commands.CreateDraft())
-
-                command(party1.publicKey,BillingContract.Commands.ChipOff())
-
-                // assert whether the transaction should pass verification or not
-                this.verifies()
-            }
-
+            // Billing Chip off transaction
             transaction{
                 val billingState = BillingState(bno.party, party1.party,50L,0L,BillingStateStatus.ACTIVE)
                 billingState.chipOff(1L)
                 input(BillingContract.CONTRACT_NAME, billingState.chipOff(1L).second)
                 reference(BillingContract.CONTRACT_NAME, billingState)
                 command(party1.publicKey, BillingContract.Commands.UseChip(party1.party))
-                failsWith("There should be a UseChip command for each BillingChip owner")
+                this.verifies()
             }
-            */
-            /*
-            // An example where wrong command is used
-            transaction {
-
-                input(ExampleContract.CONTRACT_NAME, draftState1)
-                output(ExampleContract.CONTRACT_NAME, "draftState2Label", draftState2) // note adding label for future use of the state as an input
-                command(party1.publicKey, ExampleContract.Commands.CreateDraft())
-
-                // This transaction should fail, we specify the message it should fails with to pass the test
-                // this.failsWith("There should be exactly one ExampleContract command")
-                this.fails()
-                //If you comment the above failsWith() line and uncomment the below line, the test will fail as the error thrown does not match the error expected
-                //this.failsWith("Some other error message")
-            }
-            */
 
         }
     }
 
-/*
+
     @Test
     fun `Selection of Contract tests`(){
 
-        ledgerServices.ledger {
-
-            // Show CreatDraft works when correctly formed
-            transaction {
-
-                output(ExampleContract.CONTRACT_NAME, draftState1)
-                command(party1.publicKey, ExampleContract.Commands.CreateDraft())
-                this.verifies()
-            }
-
-            // Show AmendDraft works when correctly formed
-            transaction {
-
-                input(ExampleContract.CONTRACT_NAME, draftState1)
-                output(ExampleContract.CONTRACT_NAME, draftState2)
-                command(party1.publicKey, ExampleContract.Commands.AmendDraft())
-                this.verifies()
-            }
-
-            // Show Agree works when correctly formed
-            transaction {
-                input(ExampleContract.CONTRACT_NAME, draftState1)
-                output(ExampleContract.CONTRACT_NAME, agreedState1)
-                command(listOf(party1.publicKey, party2.publicKey), ExampleContract.Commands.Agree())
-                this.verifies()
-            }
-
-            // CreateDraft transaction can't have an input state
-            transaction {
-
-                input(ExampleContract.CONTRACT_NAME, draftState1)
-                output(ExampleContract.CONTRACT_NAME, draftState2)
-                command(party1.publicKey, ExampleContract.Commands.CreateDraft())
-                this.failsWith("There should be no ExampleState inputs")
-            }
-
-            // test check that only status may change on Agree
-            transaction {
-                input(ExampleContract.CONTRACT_NAME, draftState2)
-                output(ExampleContract.CONTRACT_NAME, agreedState1)
-                command(listOf(party1.publicKey, party2.publicKey), ExampleContract.Commands.Agree())
-                this.failsWith("Only the status may change")
-            }
-
-            // Test both signatures on agree
-            transaction {
-                input(ExampleContract.CONTRACT_NAME, draftState1)
-                output(ExampleContract.CONTRACT_NAME, agreedState1)
-                command(listOf(party1.publicKey), ExampleContract.Commands.Agree())
-                this.failsWith("Both participants must sign the transaction")
-            }
 
 
-            // Test that another party can't sign a draft
-            transaction {
-
-                output(ExampleContract.CONTRACT_NAME, draftState1)
-                command(otherIdentity.publicKey, ExampleContract.Commands.CreateDraft())
-                this.failsWith("At least one participant must sign the transaction")
-            }
-        }
     }
-    */
+
 }
