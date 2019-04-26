@@ -257,19 +257,12 @@ For a guided example of how to extend this template, see the Hello, World! tutor
 [here](https://docs.corda.net/hello-world-introduction.html).
 
 
-# Examples
+# Business Networks
 
-This template includes the following: 
+This projects uses the Business Network Membership Service Cordapp [detailed here](https://github.com/corda/corda-solutions/tree/master/bn-apps/memberships-management)
 
-ExampleState and ExampleContract: A Simple Contract-State pair which defines the following StateMachine: 
+This is a Cordapp that is installed on each node in the network, include the Business Network Operator node.
 
-![ExampleState State Machine](resources/ExampleState State machine.png) 
+You can interact with the Business Network through the `bnm` and `bno` apis.
 
 
-ExampleContractTests: Non exhaustive Examples of ContractTests which test the above state machine.
-
-ExampleFlows: Flows to create, amend and Agree the ExampleStates.
-
-ExampleFlowTests: Non exhaustive test to test the above flows.
-
-ExampleDriverBasedTests: Non exhaustive integration tests.
