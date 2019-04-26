@@ -1,9 +1,16 @@
 package com.template.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.businessnetworks.billing.flows.member.ChipOffBillingStateFlow
+import com.r3.businessnetworks.billing.flows.member.service.MemberBillingDatabaseService
+import com.r3.businessnetworks.billing.states.BillingChipState
+import com.r3.businessnetworks.billing.states.BillingContract
+import com.r3.businessnetworks.billing.states.BillingState
 import com.template.contracts.ExampleContract
 import com.template.states.ExampleState
 import com.template.states.ExampleStateStatus
+import net.corda.core.contracts.ReferencedStateAndRef
+import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
@@ -17,7 +24,7 @@ import net.corda.core.utilities.ProgressTracker
 // *********
 
 
-// CreateDraftFlows
+// CreateDraftFlow
 
 @InitiatingFlow
 @StartableByRPC
@@ -43,18 +50,18 @@ class CreateDraftFlow(val otherParty: Party,
         txBuilder.addOutputState(outputState)
         txBuilder.addCommand(command, me.owningKey)
 
+        // adding our billing chip to the builder
+        chipOffAndAddToBuilder(txBuilder, this)
+
         // verify
         txBuilder.verify(serviceHub)
 
         // sign
         val stx = serviceHub.signInitialTransaction(txBuilder)
 
-
         // Finalise
         val session =  initiateFlow(otherParty)
-        val ftx = subFlow((FinalityFlow(stx,session)))
-
-        return ftx
+        return subFlow(FinalityFlow(stx, listOf(session)))
     }
 }
 
@@ -106,6 +113,9 @@ class AmendDraftFlow(val existingStateRef: StateRef,
         txBuilder.addInputState(inputStateAndRef)
         txBuilder.addOutputState(outputState)
         txBuilder.addCommand(command, me.owningKey)
+
+        // adding our billing chip to the builder
+        chipOffAndAddToBuilder(txBuilder, this)
 
         // verify
         txBuilder.verify(serviceHub)
@@ -168,6 +178,9 @@ class AgreeFlow(val existingStateRef: StateRef) : FlowLogic<SignedTransaction>()
         txBuilder.addOutputState(outputState)
         txBuilder.addCommand(command, me.owningKey, otherParty.owningKey)
 
+        // adding our billing chip to the builder
+        chipOffAndAddToBuilder(txBuilder, this)
+
         // verify
         txBuilder.verify(serviceHub)
 
@@ -202,6 +215,32 @@ class AgreeResponderFlow(val otherPartySession: FlowSession) : FlowLogic<SignedT
         return subFlow(ReceiveFinalityFlow(otherPartySession, expectedTxId = txId))
 
     }
+}
+
+
+@Suspendable
+private fun chipOff(flowLogic : FlowLogic<*>) : Pair<StateAndRef<BillingState>, StateAndRef<BillingChipState>> {
+    val databaseService = flowLogic.serviceHub.cordaService(MemberBillingDatabaseService::class.java)
+    // getting billing state from the vault. We know that there is only one billing state in the vault
+    val billingState = databaseService.getOurActiveBillingStates().single()
+    // chipping off an amount for transaction
+    val (chips, _) = flowLogic.subFlow(ChipOffBillingStateFlow(billingState, ExampleContract.BILLING_CHIPS_TO_PAY, 1))
+    // fetching newly issued billing chip
+    val billingChip = databaseService.getBillingChipStateByLinearId(chips.single().linearId)!!
+    // fetching billing state after chip off
+    val billingStateAfterChipOff = databaseService.getBillingStateByLinearId(billingState.state.data.linearId)!!
+    return Pair(billingStateAfterChipOff, billingChip)
+}
+
+@Suspendable
+private fun chipOffAndAddToBuilder(builder : TransactionBuilder, flowLogic : FlowLogic<*>) {
+    val (billingState, billingChip) = chipOff(flowLogic)
+    // adding the chip as an input
+    builder.addInputState(billingChip)
+            // adding UseChip command
+            .addCommand(BillingContract.Commands.UseChip(flowLogic.ourIdentity), flowLogic.ourIdentity.owningKey)
+            // adding billing state as reference input
+            .addReferenceState(ReferencedStateAndRef(billingState))
 }
 
 

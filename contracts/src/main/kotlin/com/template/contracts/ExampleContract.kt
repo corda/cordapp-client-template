@@ -1,11 +1,13 @@
 package com.template.contracts
 
+import com.r3.businessnetworks.billing.states.BillingChipState
 import com.template.states.ExampleState
 import com.template.states.ExampleStateStatus
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireThat
+import net.corda.core.identity.Party
 import net.corda.core.transactions.LedgerTransaction
 
 // ************
@@ -14,8 +16,10 @@ import net.corda.core.transactions.LedgerTransaction
 class ExampleContract : Contract {
 
     companion object {
-        // Used to identify our contract when building a transaction.
-        const val ID = "com.template.contracts.ExampleContract"
+        // Used to identify our contract when building a transaction and
+        // the amount of billing chips to be paid for each transaction by its participants
+        const val BILLING_CHIPS_TO_PAY = 10L
+        const val CONTRACT_NAME = "com.template.contracts.ExampleContract"
     }
 
     // Used to indicate the transaction's intent.
@@ -67,6 +71,9 @@ class ExampleContract : Contract {
             val signersKeys = command.signers.toSet()
             val participantsKeys = exampleStateOutputs.first().participants.map {it.owningKey}.toSet()
             "At least one participant must sign the transaction" using (participantsKeys.intersect(signersKeys).isNotEmpty())
+
+            // Verify issuer has paid
+            verifyThatParticipantHasPaid(exampleStateOutputs.first().buyer, tx)
         }
     }
 
@@ -89,6 +96,7 @@ class ExampleContract : Contract {
             val signersKeys = command.signers.toSet()
             val participantsKeys = exampleStateOutputs.first().participants.map {it.owningKey}.toSet()
             "At least one participant must sign the transaction" using (participantsKeys.intersect(signersKeys).isNotEmpty())
+
         }
     }
 
@@ -117,7 +125,17 @@ class ExampleContract : Contract {
             val participantsKeys = exampleStateOutputs.first().participants.map {it.owningKey}.toSet()
             "Both participants must sign the transaction" using (signersKeys.containsAll(participantsKeys))
 
+            //Verify buyer pays for the transaction
+            verifyThatParticipantHasPaid(exampleStateOutputs.first().buyer, tx)
 
+        }
+    }
+
+    private fun verifyThatParticipantHasPaid(party : Party, tx : LedgerTransaction) {
+        // filtering out a billing chip for this particular party. Assuming that each party can add only a single chip to transaction
+        val billingChip = tx.inputsOfType<BillingChipState>().single { it.owner == party }
+        requireThat {
+            "Billing chip amount should be $BILLING_CHIPS_TO_PAY" using (billingChip.amount == BILLING_CHIPS_TO_PAY)
         }
     }
 }
