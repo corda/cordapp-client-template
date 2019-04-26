@@ -10,7 +10,7 @@ Welcome to the Kotlin CorDapp template. The CorDapp template is a stubbed-out Co
 
 See https://docs.corda.net/getting-set-up.html.
 
-This includes having pre `1.8.0_161` versions of the Java Development Kit (JDK) and Gradle version `5.3`
+This includes installing pre `1.8.0_161` versions of the Java Development Kit (JDK) and Gradle version `5.3` 
 
 # Usage
 
