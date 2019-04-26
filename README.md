@@ -113,7 +113,7 @@ Each node has it's own corresponding Spring server that interacts with it via No
 
     ./gradlew runPartyAServer 
     ./gradlew runPartyBServer
-    ./gradlew runPartyCServer  
+    ./gradlew runPartyCServer
     
 These web servers are hosted on ports 50005, 50006 and 50007 respectively. You can test they have launched successfully by connecting to one of there endpoints.
 
