@@ -34,12 +34,8 @@ This can be done by the network bootstrapper method simply by running the two sc
     chmod +x deployNodes.sh runNodes.sh requestBusinessNetworkMembership.sh
     ./deployNodes.sh 
     ./runNodes.sh
-## Open project in Intellij
-
 
 ## Interacting with the nodes
-
-
 
 ### Shell
 
