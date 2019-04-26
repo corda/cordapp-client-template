@@ -64,7 +64,8 @@ class ExampleContractTests{
                 reference(BillingContract.CONTRACT_NAME, billingChip1)
 
                 // command() adds a command to the transaction, you need to supply the required signers and the command
-                command(party1.publicKey, ExampleContract.Commands.CreateDraft())
+                command(signer = party1.publicKey, commandData = ExampleContract.Commands.CreateDraft())
+
                 command(signer = party1.publicKey, commandData = BillingContract.Commands.ChipOff())
 
                 // assert whether the transaction should pass verification or not

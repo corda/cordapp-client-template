@@ -1,125 +1,121 @@
 package com.template
 
-
+import com.r3.businessnetworks.billing.flows.bno.IssueBillingStateFlow
+import com.r3.businessnetworks.testutilities.AbstractBusinessNetworksFlowTest
+import com.r3.businessnetworks.testutilities.identity
+import com.template.contracts.ExampleContract
 import com.template.flows.AgreeFlow
 import com.template.flows.AmendDraftFlow
 import com.template.flows.CreateDraftFlow
-import com.template.flows.CreateDraftResponderFlow
 import com.template.states.ExampleState
-import com.template.states.ExampleStateStatus
-import net.corda.core.contracts.StateRef
 import net.corda.core.node.services.queryBy
-import net.corda.core.utilities.getOrThrow
-import net.corda.testing.common.internal.testNetworkParameters
-import net.corda.testing.node.MockNetwork
-import net.corda.testing.node.MockNetworkParameters
-import net.corda.testing.node.TestCordapp
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
-class ExampleFlowTests{
+class ExampleFlowTests : AbstractBusinessNetworksFlowTest(1, 2,
+        listOf( "com.template.contracts",
+                "com.template.flows",
+                "com.r3.businessnetworks.billing.flows",
+                "com.r3.businessnetworks.billing.states")){
 
+    private fun bnoNode() = bnoNodes.single()
+    private fun participant1Node() = participantsNodes[0]
+    private fun participant2Node() = participantsNodes[1]
 
-    val mnp = MockNetworkParameters(listOf(TestCordapp.findCordapp("com.template.contracts"), TestCordapp.findCordapp("com.template.flows")
-    ))
+    @Test
+    fun `Flow Direct Path`() {
+        // issuing billing chips to both parties
+        // issuer requires more tokens as they need to pay twice
+        runFlowAndReturn(bnoNode(), IssueBillingStateFlow(participant1Node().identity(), 2 * ExampleContract.BILLING_CHIPS_TO_PAY))
+        runFlowAndReturn(bnoNode(), IssueBillingStateFlow(participant2Node().identity(), ExampleContract.BILLING_CHIPS_TO_PAY))
 
-    val mockNetworkParameters = mnp.withNetworkParameters(testNetworkParameters(minimumPlatformVersion = 4))
+        // Party 1 Issuing an ExampleState
+        runFlowAndReturn(participant1Node(), CreateDraftFlow(participant2Node().identity(),"agreement 1"))
 
-    private val network = MockNetwork(mockNetworkParameters)
+        // Party 2 Amending that state
+        val exampleState1 = participant2Node().services.vaultService.queryBy<ExampleState>().states.single()
+        runFlowAndReturn(participant2Node(), AmendDraftFlow(exampleState1.ref,"amending agreement 1"))
 
-    private val a = network.createNode()
-    private val b = network.createNode()
+        // Party 1 Agree flow of same state
+        val exampleState2 = participant1Node().services.vaultService.queryBy<ExampleState>().states.single()
+        runFlowAndReturn(participant1Node(), AgreeFlow(exampleState2.ref))
 
-    private val partya = a.info.legalIdentities.first()
-    private val partyb = b.info.legalIdentities.first()
-
-    init {
-        listOf(a, b).forEach {
-            it.registerInitiatedFlow(CreateDraftResponderFlow::class.java)
-        }
     }
-
-    @Before
-    fun setup() = network.runNetwork()
-
-    @After
-    fun tearDown() = network.stopNodes()
-
 
     @Test
     fun `CreateDraftFlow Test`(){
 
+        // issuing billing chips to both parties
+        // issuer requires more tokens as they need to pay twice
+        runFlowAndReturn(bnoNode(), IssueBillingStateFlow(participant1Node().identity(), 2 * ExampleContract.BILLING_CHIPS_TO_PAY))
+
         // trigger flow to create an ExampleState
-        val flow = CreateDraftFlow(partyb, "This is an agreement between partya and partyb")
-        val future = a.startFlow(flow)
-        network.runNetwork()
-        val returnedTx = future.getOrThrow()
+        val signedTx = runFlowAndReturn(participant1Node(), CreateDraftFlow(participant2Node().identity(),"agreement 1"))
 
-        // check the returned transaction includes the correct state
-        val returnedLedgerTx =returnedTx.toLedgerTransaction(a.services).outputs.single().data as ExampleState
-        assert(returnedLedgerTx.agreementDetails == "This is an agreement between partya and partyb" )
+        // check party has the new state in its vault
+        val result = participant1Node().services.vaultService.queryBy<ExampleState>()
 
-        // check b has the new state in its vault
-        val result = b.services.vaultService.queryBy<ExampleState>()
-        assert(result.states[0].ref.txhash == returnedTx.id)
+        // assert this is the outcome of the tx
+        assert(result.states[0].ref.txhash == signedTx.id)
     }
 
     @Test
     fun `AmendDraftFlow Test`(){
 
-        // Trigger flow to create an ExampleState
-        val flow1 = CreateDraftFlow(partyb, "This is an agreement between partya and partyb")
-        val future1 = a.startFlow(flow1)
-        network.runNetwork()
-        val returnedTx1 = future1.getOrThrow()
+        // issuing billing chips to both parties
+        // issuer requires more tokens as they need to pay twice
+        runFlowAndReturn(bnoNode(), IssueBillingStateFlow(participant1Node().identity(), 2 * ExampleContract.BILLING_CHIPS_TO_PAY))
 
-        // Trigger flow to amend
-        val stateRef1 = StateRef(returnedTx1.id, 0)
-        val flow2 = AmendDraftFlow(stateRef1, "This is a modified agreement between partya and partyb")
-        val future2 = a.startFlow(flow2)
-        network.runNetwork()
-        val returnedTx2 = future2.getOrThrow()
+        // trigger flow to create an ExampleState
+        runFlowAndReturn(participant1Node(), CreateDraftFlow(participant2Node().identity(),"agreement 1"))
 
-        // Check transaction contains the correct state
-        val returnedLedgerTx2 =returnedTx2.toLedgerTransaction(a.services).outputs.single().data as ExampleState
-        assert(returnedLedgerTx2.agreementDetails == "This is a modified agreement between partya and partyb" )
+        val result1 = participant1Node().services.vaultService.queryBy<ExampleState>()
 
-        // Check the counterparty also got the state
-        val stateRef2 = StateRef(returnedTx2.id, 0)
-        val state2 = b.services.toStateAndRef<ExampleState>(stateRef2)
-        assert(state2.state.data.agreementDetails == "This is a modified agreement between partya and partyb")
+        val reference = result1.states.first().ref
+
+        val signedTx2 = runFlowAndReturn(participant1Node(), AmendDraftFlow(reference, "Amended Agreement 1"))
+
+        // check party has the new state in its vault
+        val result2 = participant1Node().services.vaultService.queryBy<ExampleState>()
+
+        // assert this is the outcome of the tx
+        assert(result2.states[0].ref.txhash == signedTx2.id)
+
     }
 
     @Test
     fun `AgreeFlow Test`(){
 
-        // Trigger flow to create an ExampleState
-        val flow1 = CreateDraftFlow(partyb, "This is an agreement between partya and partyb")
-        val future1 = a.startFlow(flow1)
-        network.runNetwork()
-        val returnedTx1 = future1.getOrThrow()
+        // issuing billing chips to both parties
+        // issuer requires more tokens as they need to pay multiple times
+        runFlowAndReturn(bnoNode(), IssueBillingStateFlow(participant1Node().identity(), 4 * ExampleContract.BILLING_CHIPS_TO_PAY))
+        runFlowAndReturn(bnoNode(), IssueBillingStateFlow(participant2Node().identity(), 4 * ExampleContract.BILLING_CHIPS_TO_PAY))
 
+        // trigger flow to create an ExampleState
+        runFlowAndReturn(participant1Node(), CreateDraftFlow(participant2Node().identity(),"agreement 1"))
 
-        // Trigger flow to agree
-        val stateRef1 = StateRef(returnedTx1.id, 0)
-        val flow2 = AgreeFlow(stateRef1)
-        val future2 = a.startFlow(flow2)
-        network.runNetwork()
-        val returnedTx2 = future2.getOrThrow()
+        // Party 2 recieves state
+        val result1 = participant2Node().services.vaultService.queryBy<ExampleState>()
 
-        // Check transaction contains the correct state
-        val returnedLedgerTx2 =returnedTx2.toLedgerTransaction(a.services).outputs.single().data as ExampleState
-        assert(returnedLedgerTx2.agreementDetails == "This is an agreement between partya and partyb" )
-        assert(returnedLedgerTx2.status == ExampleStateStatus.AGREED)
+        val reference1 = result1.states.first().ref
 
-        // Check the counterparty also got the state
-        val stateRef2 = StateRef(returnedTx2.id, 0)
-        val state2 = b.services.toStateAndRef<ExampleState>(stateRef2)
-        assert(state2.state.data.agreementDetails == "This is an agreement between partya and partyb")
-        assert(state2.state.data.status == ExampleStateStatus.AGREED)
+        // Party 2 amends state
+        runFlowAndReturn(participant2Node(), AmendDraftFlow(reference1, "Amended"))
+
+        // Party 2 recieves state
+        val result2 = participant1Node().services.vaultService.queryBy<ExampleState>()
+
+        val reference2 = result2.states.first().ref
+
+        // Party 1 agrees amended state
+        val signedTx = runFlowAndReturn(participant1Node(), AgreeFlow(reference2))
+
+        // check Party 2 has the new agreed state in its vault
+        val result3 = participant2Node().services.vaultService.queryBy<ExampleState>()
+
+        // Assert this is the outcome of the final tx
+        assert(result3.states[0].ref.txhash == signedTx.id)
+        assert(result3.states.first().state.data.agreementDetails == "Amended")
+
     }
-
-
 
 }
