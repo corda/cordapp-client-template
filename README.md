@@ -169,12 +169,14 @@ For a guided example of how to extend this template, see the Hello, World! tutor
 
 # Business Networks
 
-This projects uses the Business Network Membership Service Cordapp [detailed here](https://github.com/corda/corda-solutions/tree/master/bn-apps/memberships-management)
+This projects uses the Business Network Membership Service (BNMS) Cordapp [detailed here](https://github.com/corda/corda-solutions/tree/master/bn-apps/memberships-management)
 
 This is a Cordapp that is installed on each node in the network, including the Business Network Operator node.
 
-You can interact with the Business Network through the `bnm` and `bno` apis. These endpoints can be used to request membership, activate membership, view membership status, revoke memberships and suspend memberships
+You can interact with the Business Network through the following APIs:
+1. `bnm` : used by business network members for request membership, viewing membership status, other members membership data etc.
+2. `bno` : used by the BNO to activate, revoke memberships, suspend memberships as well as check the status of memberships.
 
-These apis and defined in the BNMController and BNOController.
+These apis are defined in the BNMController and BNOController classes. 
 
 
