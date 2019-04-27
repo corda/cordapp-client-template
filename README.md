@@ -20,7 +20,7 @@ To ensure everything is building correctly run open the command line at the root
 
 On success you can open the project in Intellij. There are two approaches you can follow. 
 
-1. On launching Intellij click on import project, from existing sources, in the project wizard and select the project folder you want to import. Selecting auto-import will automatically import the gradle modules you need. Use the default gradle wrapper.
+1. On launching Intellij click import project > from existing sources, in the project wizard and select the project folder you wish to import. Selecting auto-import will import the gradle modules you need. Use the default gradle wrapper.
 
 2. If within an existing project window, select File > Open, choose the project folder. Navigate to File > Project Structure, select the Project tab on the left and choose your chosen JDK to point to Java Home directory for you JDK 1.8 and click Apply. Then go the the modules tab, import modules from the root project directory and click apply, then okay and finish. 
 
@@ -171,7 +171,7 @@ For a guided example of how to extend this template, see the Hello, World! tutor
 
 This projects uses the Business Network Membership Service Cordapp [detailed here](https://github.com/corda/corda-solutions/tree/master/bn-apps/memberships-management)
 
-This is a Cordapp that is installed on each node in the network, include the Business Network Operator node.
+This is a Cordapp that is installed on each node in the network, including the Business Network Operator node.
 
 You can interact with the Business Network through the `bnm` and `bno` apis. These endpoints can be used to request membership, activate membership, view membership status, revoke memberships and suspend memberships
 
