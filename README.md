@@ -10,7 +10,7 @@ Welcome to the Kotlin CorDapp template. The CorDapp template is a stubbed-out Co
 
 See https://docs.corda.net/getting-set-up.html.
 
-This includes having pre `1.8.0_161` versions of the Java Development Kit (JDK) and Gradle version `5.3`
+This includes installing pre `1.8.0_161` versions of the Java Development Kit (JDK) and Gradle version `5.3` 
 
 # Usage
 
@@ -20,7 +20,7 @@ To ensure everything is building correctly run open the command line at the root
 
 On success you can open the project in Intellij. There are two approaches you can follow. 
 
-1. On launching the Intellij click on import project in the project wizard and select the project folder you want to import. Selecting auto-import will automatically import the gradle modules you need.
+1. On launching Intellij click on import project, from existing sources, in the project wizard and select the project folder you want to import. Selecting auto-import will automatically import the gradle modules you need. Use the default gradle wrapper.
 
 2. If within an existing project window, select File > Open, choose the project folder. Navigate to File > Project Structure, select the Project tab on the left and choose your chosen JDK to point to Java Home directory for you JDK 1.8 and click Apply. Then go the the modules tab, import modules from the root project directory and click apply, then okay and finish. 
 
@@ -34,8 +34,6 @@ This can be done by the network bootstrapper method simply by running the two sc
     chmod +x deployNodes.sh runNodes.sh requestBusinessNetworkMembership.sh
     ./deployNodes.sh 
     ./runNodes.sh
-## Open project in Intellij
-
 
 ## Interacting with the nodes
 
@@ -68,6 +66,18 @@ the other nodes on the network:
       {
       "addresses" : [ "localhost:10008" ],
       "legalIdentitiesAndCerts" : [ "O=PartyB, L=New York, C=US" ],
+      "platformVersion" : 3,
+      "serial" : 1541505384742
+    },
+      {
+      "addresses" : [ "localhost:10011" ],
+      "legalIdentitiesAndCerts" : [ "O=PartyC, L=New York, C=US" ],
+      "platformVersion" : 3,
+      "serial" : 1541505384742
+    },
+      {
+      "addresses" : [ "localhost:10014" ],
+      "legalIdentitiesAndCerts" : [ "O=Polo_BNO, L=London, C=US" ],
       "platformVersion" : 3,
       "serial" : 1541505384742
     }
@@ -103,7 +113,7 @@ Each node has it's own corresponding Spring server that interacts with it via No
 
     ./gradlew runPartyAServer 
     ./gradlew runPartyBServer
-    ./gradlew runPartyCServer  
+    ./gradlew runPartyCServer
     
 These web servers are hosted on ports 50005, 50006 and 50007 respectively. You can test they have launched successfully by connecting to one of there endpoints.
 
@@ -121,7 +131,118 @@ The list of available endpoints to play with now are:
     /api/states
     
 You can add your own custom endpoints to the Spring Custom Controller, or any other controller of your choosing.
+<<<<<<< HEAD
     
+=======
+
+#### Joining the business network
+
+After you the webservers are successfully running you can request for each node to join the business network of the BNO node. This is done via the `requestBusinessNetworkMembership.sh` script within the `scripts` folder.
+
+### Run a local Docker network
+
+You can interact with the Corda nodes on your own mini network of docker containers. You can bootstrap this network via the `docker.sh` script within docker module. This script will create containers according to how many names you specifiy in the participant.txt file. 
+The script starts by spinning up a docker network. Each container that is generated is added to the docker network `mininet`. Furthermore each Corda node in those containers joins the local Corda network by requesting access through the `netmap` container which contains:
+ 1. An identity operator (previously doorman service) 
+ 2. A Network Map Service
+ 3. A Notary
+ 
+Once the script has been successfully ran you can inspect the docker processes. via the command below which should display a list of 4 running containers; one for each of the 3 partys and one for the notary and network map service.
+
+    docker ps
+
+Alternatively you can display all docker containers whether they are running or not via the command 
+
+    docker ps -a
+    
+Once you can see the running containers. You can `ssh` in to one to interact with the corda node via the command
+
+    ssh rpcUser@localhost -p <ssh-port> #2221 is the first port used. The password is testingPassword
+    
+The template uses the Corda finance Cordapps but you can use any of your own. Just place them in the Cordapps folders by editing the script or do it after and relaunch the container. We can test this node is successfully running by running
+
+    run vaultQuery contractStateType: net.corda.finance.contracts.asset.Cash$State
+    start net.corda.finance.flows.CashIssueFlow amount: $111111, issuerBankPartyRef: 0x01, notary: Notary
+    start net.corda.finance.flows.CashPaymentFlow amount: $500, recipient: "Party2"
+    start net.corda.finance.flows.CashPaymentFlow amount: $500, recipient: "Party3"
+    
+Try other nodes too
+
+    ssh rpcUser@localhost -p 2222
+    start net.corda.finance.flows.CashPaymentFlow amount: $200, recipient: "Party1"
+    start net.corda.finance.flows.CashPaymentFlow amount: $100, recipient: "Party3"
+
+### Deploy a Kubernetes network of Corda nodes
+
+You can deploy a collection of Corda nodes within docker containers on a kubernetes cluster on your machine. Each node currently runs the [Yo Cordapp](https://github.com/corda/samples/tree/release-V4/yo-cordapp) but work is underway to link up the output of workflows and contracts build jars of this template. 
+
+The essential commands are:
+
+**Remove any existing yo-app stacks.**
+
+```
+docker stack rm yo-app --orchestrator=kubernetes
+```
+
+**Compiles the Docker images from the sub folders**
+
+For windows:
+```
+docker build .\party-a\. -t party-a
+docker build .\party-b\. -t party-b
+docker build .\party-c\. -t party-c
+```
+
+For mac:
+```
+docker build ./party-a/. -t party-a
+docker build ./party-b/. -t party-b
+docker build ./party-c/. -t party-c
+```
+
+**Deploy the stack**
+
+for windows:
+```
+docker stack deploy yo-app --compose-file .\docker-compose.yml --orchestrator=kubernetes
+```
+for mac:
+```
+docker stack deploy yo-app --compose-file ./docker-compose.yml --orchestrator=kubernetes
+```
+
+After it has been deployed, use this command to check that it is up and running:
+```
+docker stack ps yo-app --orchestrator=kubernetes
+```
+
+From the above command you can also get the containers id and feed it into this command to view the output:
+```
+docker service logs -f <CONTAINER-ID>
+```
+
+The nodes also have SSH access to the Crash shell, which allows you to execute any flows directly on the nodes.
+It may take a minute or so for the network to start up, once it does the Corda nodes be accessed via ssh with username: **user1** and password: **test**, with the following command:
+
+```
+ssh -o StrictHostKeyChecking=no user1@localhost -o UserKnownHostsFile=/dev/null -p 2221
+```
+Please note that the depending on which port number you select, you will connect to *party-a(2221)*, *party-b(2222)* or *party-c(2223)*.
+
+
+Once in the Node Shell, you can initiate a YO Flow by running the following command:
+```
+flow start YoFlow target: [NODE_NAME], for example *PartyB*
+```
+Please note that the names of the parties are *PartyA*, *PartyB* and *PartyC*, these are the Nodes X500 names and should not be confused with the directory names which are all lower case.
+
+At this point you may consider logging in to another Node and sending a Yo to PartyA as well.
+
+In order to inspect if you have received a Yo from another Node, you can execute the following command:
+```
+run vaultQuery contractStateType: net.corda.yo.YoState
+```
+>>>>>>> b7301ce815620915dcf6933fc62e13776257c091
 ## H2 Database
 
 To install H2 db in your Corda node follow the [instruction here](https://docs.corda.net/head/node-database-access-h2.html?highlight=database#connecting-using-the-h2-console
@@ -153,19 +274,14 @@ For a guided example of how to extend this template, see the Hello, World! tutor
 [here](https://docs.corda.net/hello-world-introduction.html).
 
 
-# Examples
+# Business Networks
 
-This template includes the following: 
+This projects uses the Business Network Membership Service Cordapp [detailed here](https://github.com/corda/corda-solutions/tree/master/bn-apps/memberships-management)
 
-ExampleState and ExampleContract: A Simple Contract-State pair which defines the following StateMachine: 
+This is a Cordapp that is installed on each node in the network, include the Business Network Operator node.
 
-![ExampleState State Machine](resources/ExampleState State machine.png) 
+You can interact with the Business Network through the `bnm` and `bno` apis. These endpoints can be used to request membership, activate membership, view membership status, revoke memberships and suspend memberships
+
+These apis and defined in the BNMController and BNOController.
 
 
-ExampleContractTests: Non exhaustive Examples of ContractTests which test the above state machine.
-
-ExampleFlows: Flows to create, amend and Agree the ExampleStates.
-
-ExampleFlowTests: Non exhaustive test to test the above flows.
-
-ExampleDriverBasedTests: Non exhaustive integration tests.
