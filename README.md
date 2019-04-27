@@ -39,8 +39,6 @@ This can be done by the network bootstrapper method simply by running the two sc
 
 ## Interacting with the nodes
 
-
-
 ### Shell
 
 When started via the command line, each node will display an interactive shell:
@@ -124,108 +122,6 @@ The list of available endpoints to play with now are:
     
 You can add your own custom endpoints to the Spring Custom Controller, or any other controller of your choosing.
     
-### Run a local Docker network
-
-You can interact with the Corda nodes on your own mini network of docker containers. You can bootstrap this network via the `docker.sh` script within docker module. This script will create containers according to how many names you specifiy in the participant.txt file. 
-The script starts by spinning up a docker network. Each container that is generated is added to the docker network `mininet`. Furthermore each Corda node in those containers joins the local Corda network by requesting access through the `netmap` container which contains:
- 1. An identity operator (previously doorman service) 
- 2. A Network Map Service
- 3. A Notary
- 
-Once the script has been successfully ran you can inspect the docker processes. via the command below which should display a list of 4 running containers; one for each of the 3 partys and one for the notary and network map service.
-
-    docker ps
-
-Alternatively you can display all docker containers whether they are running or not via the command 
-
-    docker ps -a
-    
-Once you can see the running containers. You can `ssh` in to one to interact with the corda node via the command
-
-    ssh rpcUser@localhost -p <ssh-port> #2221 is the first port used. The password is testingPassword
-    
-The template uses the Corda finance Cordapps but you can use any of your own. Just place them in the Cordapps folders by editing the script or do it after and relaunch the container. We can test this node is successfully running by running
-
-    run vaultQuery contractStateType: net.corda.finance.contracts.asset.Cash$State
-    start net.corda.finance.flows.CashIssueFlow amount: $111111, issuerBankPartyRef: 0x01, notary: Notary
-    start net.corda.finance.flows.CashPaymentFlow amount: $500, recipient: "Party2"
-    start net.corda.finance.flows.CashPaymentFlow amount: $500, recipient: "Party3"
-    
-Try other nodes too
-
-    ssh rpcUser@localhost -p 2222
-    start net.corda.finance.flows.CashPaymentFlow amount: $200, recipient: "Party1"
-    start net.corda.finance.flows.CashPaymentFlow amount: $100, recipient: "Party3"
-
-### Deploy a Kubernetes network of Corda nodes
-
-You can deploy a collection of Corda nodes within docker containers on a kubernetes cluster on your machine. Each node currently runs the [Yo Cordapp](https://github.com/corda/samples/tree/release-V4/yo-cordapp) but work is underway to link up the output of workflows and contracts build jars of this template. 
-
-The essential commands are:
-
-**Remove any existing yo-app stacks.**
-```
-docker stack rm yo-app --orchestrator=kubernetes
-```
-
-**Compiles the Docker images from the sub folders**
-
-For windows:
-```
-docker build .\party-a\. -t party-a
-docker build .\party-b\. -t party-b
-docker build .\party-c\. -t party-c
-```
-
-For mac:
-```
-docker build ./party-a/. -t party-a
-docker build ./party-b/. -t party-b
-docker build ./party-c/. -t party-c
-```
-
-**Deploy the stack**
-
-for windows:
-```
-docker stack deploy yo-app --compose-file .\docker-compose.yml --orchestrator=kubernetes
-```
-for mac:
-```
-docker stack deploy yo-app --compose-file ./docker-compose.yml --orchestrator=kubernetes
-```
-
-After it has been deployed, use this command to check that it is up and running:
-```
-docker stack ps yo-app --orchestrator=kubernetes
-```
-
-From the above command you can also get the containers id and feed it into this command to view the output:
-```
-docker service logs -f <CONTAINER-ID>
-```
-
-The nodes also have SSH access to the Crash shell, which allows you to execute any flows directly on the nodes.
-It may take a minute or so for the network to start up, once it does the Corda nodes be accessed via ssh with username: **user1** and password: **test**, with the following command:
-
-```
-ssh -o StrictHostKeyChecking=no user1@localhost -o UserKnownHostsFile=/dev/null -p 2221
-```
-Please note that the depending on which port number you select, you will connect to *party-a(2221)*, *party-b(2222)* or *party-c(2223)*.
-
-
-Once in the Node Shell, you can initiate a YO Flow by running the following command:
-```
-flow start YoFlow target: [NODE_NAME], for example *PartyB*
-```
-Please note that the names of the parties are *PartyA*, *PartyB* and *PartyC*, these are the Nodes X500 names and should not be confused with the directory names which are all lower case.
-
-At this point you may consider logging in to another Node and sending a Yo to PartyA as well.
-
-In order to inspect if you have received a Yo from another Node, you can execute the following command:
-```
-run vaultQuery contractStateType: net.corda.yo.YoState
-```
 ## H2 Database
 
 To install H2 db in your Corda node follow the [instruction here](https://docs.corda.net/head/node-database-access-h2.html?highlight=database#connecting-using-the-h2-console
