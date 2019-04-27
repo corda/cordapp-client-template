@@ -174,7 +174,7 @@ This projects uses the Business Network Membership Service (BNMS) Cordapp [detai
 This is a Cordapp that is installed on each node in the network, including the Business Network Operator node.
 
 You can interact with the Business Network through the following APIs:
-1. `bnm` : used by business network members for request membership, viewing membership status, other members membership data etc.
+1. `bnm` : used by business network members for request membership, viewing membership status and other members membership data etc.
 2. `bno` : used by the BNO to activate, revoke memberships, suspend memberships as well as check the status of memberships.
 
 These apis are defined in the BNMController and BNOController classes. 
