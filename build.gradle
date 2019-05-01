@@ -164,8 +164,6 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
                 "com.r3.businessnetworks:membership-service-contracts-and-states:2.0",
                 "com.r3.businessnetworks:businessnetworks-utilities:2.0",
                 "com.r3.businessnetworks:businessnetworks-test-utilities:2.0"
-
-
         ]
         extraConfig = [
                 // Setting the H2 address.

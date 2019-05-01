@@ -1,4 +1,4 @@
 include 'workflows'
 include 'contracts'
-include 'clients'
 include 'docker'
+include 'clients'

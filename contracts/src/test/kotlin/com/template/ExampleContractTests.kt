@@ -68,6 +68,7 @@ class ExampleContractTests{
 
             // Billing Chip off transaction
             transaction{
+
                 val billingState = BillingState(bno.party, party1.party,50L,0L,BillingStateStatus.ACTIVE)
                 billingState.chipOff(1L)
                 input(BillingContract.CONTRACT_NAME, billingState.chipOff(1L).second)
