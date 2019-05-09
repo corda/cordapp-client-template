@@ -136,6 +136,19 @@ You can add your own custom endpoints to the Spring Custom Controller, or any ot
 
 After you the webservers are successfully running you can request for each node to join the business network of the BNO node. This is done via the `requestBusinessNetworkMembership.sh` script within the `scripts` folder.
 
+## Testing
+
+### Quasar
+
+Corda flows need to be instrumented using Quasar before they are run, so that they can be suspended mid-execution.
+
+To achieve this in IntelliJ, you need to:
+
+* Create a run config for your tests
+* Open the run config and change the VM options to -ea -javaagent:PATH-TO-QUASAR-JAR
+* In the CorDapp example and templates, quasar.jar is located at lib/quasar.jar, so you'd use -ea -javaagent:../lib/quasar.jar
+* Alternatively, you can edit the default JUnit run config to use the Quasar javaagent by default, avoiding you having to do this every time you pick a new test to run.
+
 ## H2 Database
 
 To install H2 db in your Corda node follow the [instruction here](https://docs.corda.net/head/node-database-access-h2.html?highlight=database#connecting-using-the-h2-console
