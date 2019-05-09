@@ -37,11 +37,10 @@ class BNMController(
     private val bno : Party
 
 
-
-    // Upon creation, the controller starts streaming information on new ** states to a websocket.
-    // The front-end can subscribe to this websocket to be notified of updates.
     init {
         proxy = rpc.proxy
+        // This is a flow that fetches the BNO first BNO identity from the whitelist defined in the membership-conf file in the conf/ folder
+        // This could be altered to return a list of BNO identities and allow the user to select which one to interact with
         bno =  proxy.startFlow(::getBNOIdentities).returnValue.getOrThrow().first()
     }
 
@@ -72,14 +71,13 @@ class BNMController(
     }
 
     @GetMapping(value = "membersRefresh", produces = arrayOf("application/json"))
-    fun getMembersRefresh(): ResponseEntity<List<PartyAndMembershipMetadata<*>>> {
-
-         return try {
-            val parties = BNUtilities.getPartiesOnThisBusinessNetwork(proxy, bno)
-             ResponseEntity.ok().body(parties)
+    fun getMembersRefresh(): ResponseEntity<List<CordaX500Name>> {
+        return try {
+            val parties = BNUtilities.getPartiesOnThisBusinessNetwork(proxy,bno, true)
+            ResponseEntity.ok().body(parties.map { it.party.name }.toList())
         } catch (ex: Throwable) {
-             logger.error(ex.message, ex)
-             ResponseEntity.badRequest().body(null)
+            logger.error(ex.message, ex)
+            ResponseEntity.badRequest().body(null)
         }
     }
 

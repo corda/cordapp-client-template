@@ -3,7 +3,6 @@ package com.template.webserver.utilities
 import com.r3.businessnetworks.membership.flows.member.GetMembersFlow
 import com.r3.businessnetworks.membership.flows.member.PartyAndMembershipMetadata
 import com.r3.businessnetworks.membership.states.MembershipState
-import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.startTrackedFlow
@@ -25,10 +24,6 @@ class BNUtilities {
         private var timeOfLastCacheInMillis : Long = Instant.now().toEpochMilli()
         private var timeNowInMillis :  Long = Instant.now().toEpochMilli()
 
-
-        fun getPartiesOnThisBusinessNetworkExcludingMe(services: CordaRPCOps, bno : Party, myLegalName: CordaX500Name) : List<PartyAndMembershipMetadata<*>> {
-            return getPartiesOnThisBusinessNetwork(services, bno).filter { it.party.name != myLegalName }
-        }
 
         fun getPartiesOnThisBusinessNetwork(services: CordaRPCOps, bno : Party, refresh : Boolean = false) : List<PartyAndMembershipMetadata<*>> {
             timeNowInMillis = Instant.now().toEpochMilli()
@@ -54,6 +49,14 @@ class BNUtilities {
                 membershipStates.size > 1 -> throw RuntimeException("Found more than one membership sate") //@todo this is probably a possible valid scenario
                 else -> return membershipStates.get(0).state.data
             }
+        }
+
+        fun membershipToJSON(membership : MembershipState<*>) : Map<String,String>{
+            return kotlin.collections.mapOf(
+                "BNO" to membership.bno.name.toString(),
+                "Member" to membership.member.name.toString(),
+                "Status" to membership.status.name
+            )
         }
     }
 }
