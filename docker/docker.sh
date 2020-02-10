@@ -27,9 +27,9 @@ nodeListlength=${#NODE_LIST[*]}
 mkdir cordapps
 rm -f cordapps/*
 
-wget -O cordapps/finance-contracts.jar          https://ci-artifactory.corda.r3cev.com/artifactory/list/corda-dev/net/corda/corda-finance-contracts/4.0-SNAPSHOT/corda-finance-contracts-4.0-SNAPSHOT.jar
-wget -O cordapps/finance-workflows.jar          https://ci-artifactory.corda.r3cev.com/artifactory/list/corda-dev/net/corda/corda-finance-workflows/4.0-SNAPSHOT/corda-finance-workflows-4.0-SNAPSHOT.jar
-wget -O cordapps/confidential-identities.jar    https://ci-artifactory.corda.r3cev.com/artifactory/list/corda-dev/net/corda/corda-confidential-identities/4.0-SNAPSHOT/corda-confidential-identities-4.0-SNAPSHOT.jar
+wget -O cordapps/finance-contracts.jar          https://software.r3.com/artifactory/list/corda-dev/net/corda/corda-finance-contracts/4.0-SNAPSHOT/corda-finance-contracts-4.0-SNAPSHOT.jar
+wget -O cordapps/finance-workflows.jar          https://software.r3.com/artifactory/list/corda-dev/net/corda/corda-finance-workflows/4.0-SNAPSHOT/corda-finance-workflows-4.0-SNAPSHOT.jar
+wget -O cordapps/confidential-identities.jar    https://software.r3.com/artifactory/list/corda-dev/net/corda/corda-confidential-identities/4.0-SNAPSHOT/corda-confidential-identities-4.0-SNAPSHOT.jar
 #### END CORDAPP SETUP####
 
 #### BEGIN SIGNING SETUP ####
